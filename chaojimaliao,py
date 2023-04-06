@@ -1,0 +1,102 @@
+import pygame
+import random
+
+# 游戏窗口大小
+SCREEN_WIDTH = 600
+SCREEN_HEIGHT = 600
+
+# 蛇的移动速度
+SNAKE_SPEED = 20
+
+# 定义颜色
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+
+# 初始化 Pygame 库
+pygame.init()
+
+# 创建游戏窗口
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("贪吃蛇")
+
+# 定义字体
+font = pygame.font.SysFont(None, 30)
+
+# 定义蛇的初始位置和长度
+snake_x = SCREEN_WIDTH // 2
+snake_y = SCREEN_HEIGHT // 2
+snake_length = 1
+snake_body = [(snake_x, snake_y)]
+
+# 定义食物的初始位置
+food_x = random.randint(0, SCREEN_WIDTH // SNAKE_SPEED - 1) * SNAKE_SPEED
+food_y = random.randint(0, SCREEN_HEIGHT // SNAKE_SPEED - 1) * SNAKE_SPEED
+
+# 定义蛇的移动方向
+direction = "right"
+
+# 游戏循环
+game_over = False
+while not game_over:
+    # 处理事件
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            game_over = True
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP and direction != "down":
+                direction = "up"
+            elif event.key == pygame.K_DOWN and direction != "up":
+                direction = "down"
+            elif event.key == pygame.K_LEFT and direction != "right":
+                direction = "left"
+            elif event.key == pygame.K_RIGHT and direction != "left":
+                direction = "right"
+
+    # 根据移动方向更新蛇的位置
+    if direction == "up":
+        snake_y -= SNAKE_SPEED
+    elif direction == "down":
+        snake_y += SNAKE_SPEED
+    elif direction == "left":
+        snake_x -= SNAKE_SPEED
+    elif direction == "right":
+        snake_x += SNAKE_SPEED
+
+    # 判断蛇是否吃到食物
+    if snake_x == food_x and snake_y == food_y:
+        snake_length += 1
+        food_x = random.randint(0, SCREEN_WIDTH // SNAKE_SPEED - 1) * SNAKE_SPEED
+        food_y = random.randint(0, SCREEN_HEIGHT // SNAKE_SPEED - 1) * SNAKE_SPEED
+
+    # 更新蛇的身体
+    snake_body.insert(0, (snake_x, snake_y))
+    if len(snake_body) > snake_length:
+        snake_body.pop()
+
+    # 绘制背景
+    screen.fill(BLACK)
+
+    # 绘制蛇的身体和食物
+    for x, y in snake_body:
+        pygame.draw.rect(screen, GREEN, (
+x, y, SNAKE_SPEED, SNAKE_SPEED))
+pygame.draw.rect(screen, RED, (food_x, food_y, SNAKE_SPEED, SNAKE_SPEED))
+
+# 判断游戏是否结束
+if snake_x < 0 or snake_x >= SCREEN_WIDTH or snake_y < 0 or snake_y >= SCREEN_HEIGHT:
+    game_over = True
+for i in range(1, len(snake_body)):
+    if snake_x == snake_body[i][0] and snake_y == snake_body[i][1]:
+        game_over = True
+
+# 绘制分数
+score = font.render("Score: " + str(snake_length - 1), True, WHITE)
+screen.blit(score, (10, 10))
+
+# 更新屏幕
+pygame.display.update()
+
+# 控制游戏帧率
+pygame.time.Clock().tick(10)
